@@ -90,7 +90,7 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
               <Label htmlFor="username" className="mb-2 block text-sm font-light tracking-wide text-white/70">
-                ユーザー名またはメールアドレス
+                メールアドレス
               </Label>
               <div className="flex">
                 <div className="mr-2">
@@ -161,9 +161,9 @@ export default function LoginPage() {
         {/* アカウント作成リンク */}
         <div className="mt-4 w-full max-w-[340px] border border-white/10 bg-black/30 backdrop-blur-sm p-4 text-center">
           <p className="text-sm font-light tracking-wide text-white/70">
-            Connectix 2 は初めてですか？{" "}
+            アカウントをお持ちでない場合は{" "}
             <Link href="/signup" className="text-yellow-400/80 hover:text-yellow-400">
-              アカウントを作成
+              こちらからサインアップ
             </Link>
           </p>
         </div>

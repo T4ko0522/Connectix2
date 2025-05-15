@@ -15,7 +15,7 @@ interface LoadingScreenProps {
 
 export function LoadingScreen({
   onLoadingComplete,
-  duration = 5000, // デフォルトは5秒
+  duration = 3000, // ３秒に変更
   initialProgress = 0,
   logoSize = 50,
   noiseOpacity = 0.03,
