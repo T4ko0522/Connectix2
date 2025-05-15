@@ -16,6 +16,7 @@ out/
 # Build artifacts
 build/
 dist/
+tsconfig.tsbuildinfo
 
 # Environment variables
 .env
