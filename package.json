@@ -1,6 +1,7 @@
 {
   "name": "connectix2",
-  "version": "0.1.0",
+  "version": "1.0.0",
+  "description": "Connectix 2.0 - A modern, open source web app alternative to Connectix.",
   "private": true,
   "scripts": {
     "dev": "next dev",
