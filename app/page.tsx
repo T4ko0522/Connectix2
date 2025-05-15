@@ -1,103 +1,219 @@
-import Image from "next/image";
+"use client"
 
-export default function Home() {
+import type React from "react"
+
+import Link from "next/link"
+import { Button } from "@/components/ui/button"
+import { useState, useEffect } from "react"
+import { Logo } from "@/components/logo"
+import { LoadingScreen } from "@/components/loading-screen"
+import { usePathname, useRouter } from "next/navigation"
+import { ModernLayout } from "@/components/modern-layout"
+import { IconButton } from "@/components/ui/icon-button"
+import { HelpCircle, MessageCircle, User, Menu, LogOut } from "lucide-react"
+import { SearchBox } from "@/components/search-box"
+import { toast } from "react-toastify"
+
+export default function HomePage() {
+  const [loading, setLoading] = useState(true)
+  const [noiseOpacity, setNoiseOpacity] = useState(0.03)
+  const [username, setUsername] = useState("")
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+  const pathname = usePathname()
+  const router = useRouter()
+
+  // 初期化時にローディング状態を設定
+  useEffect(() => {
+    // 最初のレンダリング時にローディングを表示
+    const hasVisited = sessionStorage.getItem("visited_home")
+    if (!hasVisited) {
+      setLoading(true)
+      sessionStorage.setItem("visited_home", "true")
+    } else {
+      setLoading(false)
+
+      // 保存されたノイズ設定を取得
+      const savedNoiseOpacity = sessionStorage.getItem("noise_opacity")
+      if (savedNoiseOpacity) {
+        setNoiseOpacity(Number.parseFloat(savedNoiseOpacity))
+      }
+    }
+
+    // ログイン状態を確認
+    const loggedInStatus = localStorage.getItem("is_logged_in")
+    setIsLoggedIn(loggedInStatus === "true")
+
+    // 保存されたユーザー名を取得
+    const savedUsername = localStorage.getItem("saved_username")
+    if (savedUsername) {
+      setUsername(savedUsername)
+    }
+  }, [])
+
+  const handleLoadingComplete = () => {
+    setLoading(false)
+  }
+
+  const handleNoiseChange = (opacity: number) => {
+    setNoiseOpacity(opacity)
+    // ノイズ設定をセッションストレージに保存
+    sessionStorage.setItem("noise_opacity", opacity.toString())
+  }
+
+  // ユーザー名の入力を処理
+  const handleUsernameChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value
+    setUsername(value)
+    // ローカルストレージに保存
+    localStorage.setItem("saved_username", value)
+  }
+
+  // ログインページに移動する際にユーザー名を保持
+  const handleLoginClick = () => {
+    if (username) {
+      localStorage.setItem("saved_username", username)
+    }
+    router.push("/login")
+  }
+
+  // ダッシュボードに移動
+  const handleDashboardClick = () => {
+    router.push("/dashboard")
+  }
+
+  // ログアウト処理
+  const handleLogout = () => {
+    localStorage.setItem("is_logged_in", "false")
+    setIsLoggedIn(false)
+
+    // ログアウト成功のトースト通知
+    toast.info("ログアウトしました", {
+      icon: () => <span>👋</span>,
+    })
+
+    // オプション: ホームページをリロードする
+    router.refresh()
+  }
+
   return (
-    <div className="grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]">
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
+    <>
+      {loading ? (
+        <LoadingScreen
+          onLoadingComplete={handleLoadingComplete}
+          duration={5000}
+          onNoiseChange={handleNoiseChange}
+          noiseOpacity={noiseOpacity}
         />
-        <ol className="list-inside list-decimal text-sm/6 text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2 tracking-[-.01em]">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-[family-name:var(--font-geist-mono)] font-semibold">
-              app/page.tsx
-            </code>
-            .
-          </li>
-          <li className="tracking-[-.01em]">
-            Save and see your changes instantly.
-          </li>
-        </ol>
+      ) : (
+        <ModernLayout noiseOpacity={noiseOpacity}>
+          {/* ナビゲーションバー */}
+          <nav className="modern-nav">
+            <div className="modern-container flex h-20 items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Logo size={32} />
+              </div>
+              <div className="hidden items-center gap-8 md:flex">
+                <SearchBox />
+                <Link href="/help" className="modern-link flex items-center gap-2">
+                  <HelpCircle size={16} />
+                  <span>ヘルプ</span>
+                </Link>
+                <Link
+                  href="https://discord.gg/JP7uwGDv5T"
+                  target="_blank"
+                  className="modern-link flex items-center gap-2"
+                >
+                  <MessageCircle size={16} />
+                  <span>Discord</span>
+                </Link>
 
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:w-auto"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent font-medium text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 w-full sm:w-auto md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
-        </div>
-      </main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
-    </div>
-  );
+                {isLoggedIn ? (
+                  <>
+                    <Button onClick={handleDashboardClick} className="modern-link flex items-center gap-2">
+                      <User size={16} />
+                      <span>ダッシュボード</span>
+                    </Button>
+                    <Button onClick={handleLogout} className="modern-button flex items-center gap-2">
+                      <LogOut size={16} />
+                      <span>ログアウト</span>
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <button onClick={handleLoginClick} className="modern-link flex items-center gap-2">
+                      <User size={16} />
+                      <span>ログイン</span>
+                    </button>
+                    <Button asChild className="modern-button-primary">
+                      <Link href="/signup">無料登録</Link>
+                    </Button>
+                  </>
+                )}
+              </div>
+              <div className="md:hidden">
+                <IconButton icon={<Menu size={18} />} aria-label="メニュー" />
+              </div>
+            </div>
+          </nav>
+
+          {/* メインコンテンツ */}
+          <main className="pt-32 pb-20">
+            <div className="modern-container text-center">
+              <h1 className="modern-title mb-6">あなたの全てをここに</h1>
+              <p className="modern-subtitle mx-auto mb-12 max-w-2xl">
+                プロフィールを共有するならconnectix2
+                <br />
+                リンク一つで全てを共有できます。
+              </p>
+
+              {/* ユーザー名入力フィールド */}
+              <div className="mx-auto mb-16 flex max-w-md flex-col items-center gap-4 sm:flex-row">
+                <div className="relative flex w-full items-center overflow-hidden rounded-md border border-white/20 bg-black/50">
+                  <span className="pl-4 pr-0 text-white/70 font-light">temp.tmp/</span>
+                  <input
+                    type="text"
+                    placeholder="username"
+                    className="flex-1 bg-transparent px-0 py-2.5 text-sm text-white placeholder:text-white/30 focus:outline-none focus:ring-0 border-0"
+                    value={username}
+                    onChange={handleUsernameChange}
+                  />
+                </div>
+                <Button
+                  className="modern-button-primary w-full sm:w-auto"
+                  onClick={() => (isLoggedIn ? router.push("/dashboard") : router.push("/signup"))}
+                >
+                  {isLoggedIn ? "ダッシュボードへ" : "今すぐ登録"}
+                </Button>
+              </div>
+
+              {/* スクリーンショット */}
+              <div className="relative mt-20">
+                <div className="absolute -left-4 -top-4 h-32 w-32 rounded-full bg-yellow-400/10 blur-3xl"></div>
+                <div className="absolute -bottom-8 -right-8 h-40 w-40 rounded-full bg-yellow-400/10 blur-3xl"></div>
+
+                <div className="relative mx-auto max-w-5xl overflow-hidden border border-white/10 bg-black/30 backdrop-blur-sm rounded-xl">
+                  <img
+                    src="/placeholder.svg?key=x6xcp"
+                    alt="Connectix 2 ダッシュボード"
+                    className="w-full rounded-xl"
+                  />
+                </div>
+
+                <div className="absolute -bottom-16 left-10 w-48 -rotate-6 border border-white/10 bg-black/30 backdrop-blur-sm rounded-xl overflow-hidden">
+                  <img src="/placeholder.svg?key=i5njd" alt="モバイル表示" className="w-full rounded-xl" />
+                </div>
+              </div>
+            </div>
+          </main>
+
+          {/* フッター */}
+          <footer className="modern-footer">
+            <div className="modern-container text-center">
+              <p>© {new Date().getFullYear()} Connectix 2. All rights reserved.</p>
+            </div>
+          </footer>
+        </ModernLayout>
+      )}
+    </>
+  )
 }
