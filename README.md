@@ -30,9 +30,9 @@ Connectix2 は、**VRChat のログイン情報を一切保存・記録しませ
 | 分類              | 使用技術                              |
 | ----------------- | ------------------------------------- |
 | フレームワーク    | Next.js 15 (React 18) ※ Frontend & Backend |
-| 言語              | TypeScript                            |
+| 言語              | TypeScript, Python(一部バックエンド)                            |
 | UI／スタイリング  | Tailwind CSS, shadcn/ui, Radix UI     |
-| Lint／Format      | ESLint, Prettier                      |
+| Lint／Format      | ESLint                      |
 | ホスティング      | AWS（EKS + Kubernetes）               |
 | パッケージ管理    | pnpm                                  |
 
