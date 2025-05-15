@@ -44,57 +44,62 @@ export default function SignupPage() {
     setIsLoading(true)
 
     try {
-      // 入力値の検証
       if (!email || !password || !username) {
-        toast.error("すべての必須項目を入力してください", {
+        toast.error("すべての必須項目を入力してください", { position: "bottom-right" })
+        setIsLoading(false)
+        return
+      }
+
+      // username バリデーション（/profile/slug に使う想定）
+      if (!/^[a-zA-Z0-9](?:[a-zA-Z0-9_-]{0,18}[a-zA-Z0-9])?$/.test(username)) {
+        toast.error("ユーザー名は1〜20文字の英数字、アンダースコア、ハイフンで構成され、先頭と末尾は英数字である必要があります", {
           position: "bottom-right",
         })
         setIsLoading(false)
         return
       }
 
-      // パスワードの長さチェック
-      if (password.length < 8) {
-        toast.error("パスワードは8文字以上である必要があります", {
+      if (password.length < 8 || !/\d/.test(password) || !/[a-z]/.test(password)) {
+        toast.error("パスワードは8文字以上で、数字と小文字を含めてください", {
           position: "bottom-right",
         })
         setIsLoading(false)
         return
       }
 
-      // 数字を含むかチェック
-      if (!/\d/.test(password)) {
-        toast.error("パスワードには少なくとも1つの数字を含める必要があります", {
+      const res = await fetch("/api/auth/signup", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password, username, displayName: username }), // displayName を仮で username と同一に
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        toast.error(data.error || "アカウント作成に失敗しました", {
           position: "bottom-right",
         })
         setIsLoading(false)
         return
       }
 
-      // 小文字を含むかチェック
-      if (!/[a-z]/.test(password)) {
-        toast.error("パスワードには少なくとも1つの小文字を含める必要があります", {
-          position: "bottom-right",
-        })
-        setIsLoading(false)
-        return
-      }
-
-      // 登録情報を一時的にローカルストレージに保存
-      localStorage.setItem("signup_temp_email", email)
-      localStorage.setItem("signup_temp_username", username) //TODO - ユーザー名の保存 デバッグ用
-      localStorage.setItem("signup_temp_password", password) // 実際のアプリではセキュリティ上の理由から保存しません。
-
-      // 二段階認証ページに遷移
-      setTimeout(() => {
-        setIsLoading(false)
-        router.push("/signup/verify")
-      }, 1000)
-    } catch (error) {
-      console.error("登録エラー:", error)
-      toast.error("アカウント登録中にエラーが発生しました", {
+      // 成功時：verifyへリダイレクト
+      toast.success("アカウントを作成しました。確認メールをチェックしてください。", {
         position: "bottom-right",
       })
+
+      localStorage.setItem("signup_temp_email", email)
+      localStorage.setItem("signup_temp_username", username)
+
+      setTimeout(() => {
+        router.push("/signup/verify")
+      }, 1200)
+    } catch (error) {
+      console.error("サインアップエラー:", error)
+      toast.error("内部エラーが発生しました", {
+        position: "bottom-right",
+      })
+    } finally {
       setIsLoading(false)
     }
   }

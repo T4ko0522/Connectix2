@@ -105,24 +105,39 @@ const handleInputChange = (index: number, value: string) => {
     }
   }
 
-  const handleResendCode = () => {
-    if (countdown > 0) return
+  const handleResendCode = async () => {
+    if (countdown > 0 || isResending) return
 
     setIsResending(true)
     setError("")
 
-    // 実際のアプリケーションでは、ここでAPIを呼び出して新しい認証コードを送信します
-    setTimeout(() => {
-      setIsResending(false)
-      startCountdown()
-      toast.info("新しい認証コードを送信しました", {
-        position: "bottom-right",
-        autoClose: 3000,
+    try {
+      const res = await fetch("/api/auth/resend", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
       })
-    }, 1500)
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || "再送信に失敗しました")
+      } else {
+        toast.info("新しい認証コードを送信しました", {
+          position: "bottom-right",
+          autoClose: 3000,
+        })
+        startCountdown()
+      }
+    } catch (error) {
+      console.error("認証コード再送信エラー:", error)
+      setError("ネットワークエラーが発生しました")
+    } finally {
+      setIsResending(false)
+    }
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError("")
 
@@ -134,61 +149,67 @@ const handleInputChange = (index: number, value: string) => {
 
     setIsLoading(true)
 
-    // 実際のアプリケーションでは、ここでAPIを呼び出して認証コードを検証します
-    // このデモでは、コード "123456" を正しいコードとします
-    setTimeout(() => {
-      if (fullCode === "123456") {
-        // 認証成功 - 直接アカウント登録を完了させる
-        completeRegistration()
-      } else {
-        // 認証失敗
-        setError("認証コードが正しくありません")
+    try {
+      const res = await fetch("/api/auth/verify", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, code: fullCode }),
+      })
+
+      const data = await res.json()
+
+      if (!res.ok) {
+        setError(data.error || "認証に失敗しました")
         setIsLoading(false)
+        return
       }
-    }, 1500)
-  }
 
-  const completeRegistration = () => {
-    // ローカルストレージから登録情報を取得
-    const tempPassword = localStorage.getItem("signup_temp_password")
-
-    if (!email || !username || !tempPassword) {
-      toast.error("登録情報が不完全です", {
+      completeRegistration()
+    } catch (error) {
+      console.error("認証APIエラー:", error)
+      toast.error("ネットワークエラーが発生しました", {
         position: "bottom-right",
       })
       setIsLoading(false)
-      return
     }
-
-    console.log("アカウント登録を完了します...")
-
-    // 実際のアプリケーションでは、ここでAPIを呼び出してユーザーを登録します
-    setTimeout(() => {
-      try {
-        // 登録成功
-        localStorage.setItem("is_logged_in", "true")
-
-        // 一時的な登録情報を削除
-        localStorage.removeItem("signup_temp_email")
-        localStorage.removeItem("signup_temp_username")
-        localStorage.removeItem("signup_temp_password")
-
-        toast.success(`${username}さん、アカウント登録が完了しました！`, {
-          icon: () => <span>🎉</span>,
-          position: "bottom-right",
-        })
-
-        // ダッシュボードに直接遷移
-        window.location.href = "/dashboard"
-      } catch (error) {
-        console.error("登録完了エラー:", error)
-        toast.error("登録の完了中にエラーが発生しました", {
-          position: "bottom-right",
-        })
-        setIsLoading(false)
-      }
-    }, 1500)
   }
+
+const completeRegistration = () => {
+  if (!email || !username) {
+    toast.error("登録情報が不完全です", {
+      position: "bottom-right",
+    })
+    setIsLoading(false)
+    return
+  }
+
+  console.log("アカウント登録を完了します...")
+
+  setTimeout(() => {
+    try {
+      localStorage.setItem("is_logged_in", "true")
+
+      // パスワードは保存していないため削除不要
+      localStorage.removeItem("signup_temp_email")
+      localStorage.removeItem("signup_temp_username")
+
+      toast.success(`${username}さん、アカウント登録が完了しました！`, {
+        icon: () => <span>🎉</span>,
+        position: "bottom-right",
+      })
+
+      window.location.href = "/dashboard"
+    } catch (error) {
+      console.error("登録完了エラー:", error)
+      toast.error("登録の完了中にエラーが発生しました", {
+        position: "bottom-right",
+      })
+      setIsLoading(false)
+    }
+  }, 1500)
+}
 
   return (
     <div className="min-h-screen bg-black text-white flex flex-col">
