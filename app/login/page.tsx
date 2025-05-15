@@ -17,6 +17,8 @@ import { GoogleIcon } from "@/components/icons"
 import { toast } from "react-toastify"
 
 export default function LoginPage() {
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [username, setUsername] = useState("")
   const [noiseOpacity, setNoiseOpacity] = useState(0.03)
@@ -40,19 +42,29 @@ export default function LoginPage() {
     e.preventDefault()
     setIsLoading(true)
 
-    // ダミーの処理（実際の認証は行わない）
-    setTimeout(() => {
-      // ログイン状態をローカルストレージに保存
-      localStorage.setItem("is_logged_in", "true")
-
-      // ログイン成功のトースト通知
-      toast.success(`${username}さん、ようこそ！`, {
-        icon: () => <span>👋</span>,
+    try {
+      const res = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       })
 
+      const data = await res.json()
+
+      if (!res.ok) {
+        toast.error(data.error || "ログインに失敗しました")
+      } else {
+        toast.success(`${data.user.email} さん、ようこそ！`, {
+          icon: () => <span>👋</span>,
+        })
+        router.push("/dashboard")
+      }
+    } catch (e) {
+      console.error("ログインエラー:", e)
+      toast.error("ネットワークエラーが発生しました")
+    } finally {
       setIsLoading(false)
-      router.push("/")
-    }, 1000)
+    }
   }
 
   const handleSocialLogin = (provider: string) => {
@@ -97,14 +109,14 @@ export default function LoginPage() {
                   <IconButton icon={<User size={16} />} type="button" tabIndex={-1} />
                 </div>
                 <Input
-                  id="username"
-                  name="username"
-                  type="text"
-                  autoComplete="username"
+                  id="email"
+                  name="email"
+                  type="email"
+                  autoComplete="email"
                   required
                   className="modern-input flex-1"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                 />
               </div>
             </div>
@@ -114,7 +126,10 @@ export default function LoginPage() {
                 <Label htmlFor="password" className="text-sm font-light tracking-wide text-white/70">
                   パスワード
                 </Label>
-                <Link href="#" className="text-xs text-yellow-400/80 hover:text-yellow-400 font-light tracking-wide">
+                <Link
+                  href="/reset-password"
+                  className="text-xs text-yellow-400/80 hover:text-yellow-400 font-light tracking-wide"
+                >
                   パスワードをお忘れですか？
                 </Link>
               </div>
@@ -129,6 +144,8 @@ export default function LoginPage() {
                   autoComplete="current-password"
                   required
                   className="modern-input flex-1"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
             </div>
