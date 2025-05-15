@@ -14,6 +14,7 @@ import {
   ExternalLink,
   X,
   AlertTriangle,
+  Lightbulb,
   Globe,
 } from "lucide-react"
 import { toast } from "react-toastify"
@@ -251,15 +252,14 @@ export function SettingsTabContent({ username }: SettingsTabContentProps) {
 
             <div className="p-4 bg-yellow-500/10 rounded-lg border border-yellow-500/20 mt-6">
               <div className="flex items-start gap-3">
-                <AlertTriangle size={18} className="text-yellow-500 mt-0.5" />
+                <Lightbulb size={18} className="text-yellow-500 mt-0.5" />
                 <div>
-                  <h3 className="text-sm font-medium text-yellow-500 mb-1">アカウント連携のメリット</h3>
+                  <h3 className="text-sm font-medium text-yellow-500 mb-1">VRChatアカウント連携</h3>
                   <p className="text-xs text-gray-400 mb-2">アカウントを連携すると、以下のメリットがあります：</p>
                   <ul className="text-xs text-gray-400 list-disc pl-4 space-y-1">
-                    <li>プロフィールページに自動的にリンクが追加されます</li>
-                    <li>各サービスのステータス（オンライン/オフライン）をプロフィールに表示できます</li>
-                    <li>各サービス上でのアクティビティをプロフィールに表示できます</li>
-                    <li>ワンクリックでサービスへの招待リンクを生成できます</li>
+                    <li>プロフィールページに自動的に埋め込みが追加されます</li>
+                    <li>Trust Rank、ステータスをプロフィールに表示できます</li>
+                    <li>直接VRChatのアカウントのリンクへリダイレクトできます</li>
                   </ul>
                 </div>
               </div>
@@ -311,8 +311,8 @@ export function SettingsTabContent({ username }: SettingsTabContentProps) {
               <div>
                 <h3 className="text-sm font-medium text-yellow-500 mb-1">セキュリティのヒント</h3>
                 <p className="text-xs text-gray-400">
-                  二段階認証を有効にすると、ログイン時にスマートフォンなどの認証デバイスによる確認が必要になります。
-                  これにより、パスワードが漏洩した場合でもアカウントを保護できます。
+                  二段階認証を有効にすると、ログイン時にメールへ認証コードが送信されます。<br />
+                  これにより、他の人があなたのアカウントにアクセスするのを防ぎます。<br />
                 </p>
               </div>
             </div>
@@ -321,14 +321,13 @@ export function SettingsTabContent({ username }: SettingsTabContentProps) {
 
         {/* ヘルプとサポート */}
         <div className="bg-gradient-to-br from-black/80 to-black/40 backdrop-blur-sm border border-yellow-900/20 rounded-xl p-6">
-          <h2 className="text-xl font-light mb-6 flex items-center">
+          <h2 className="text-xl font-light mb-6 flex items-center" onClick={() => router.push("/help")}>
             <HelpCircle size={18} className="text-yellow-500 mr-2" />
             ヘルプとサポート
           </h2>
-
           <div className="space-y-3 mb-6">
-            <ResourceLink icon={<FileText size={16} />} text="ヘルプを読む" />
-            <ResourceLink icon={<MessageSquare size={16} />} text="サポートに問い合わせ" />
+            <ResourceLink icon={<FileText size={16} />} text="ヘルプを読む" href="/help" />
+            <ResourceLink icon={<MessageSquare size={16} />} text="サポートに問い合わせ" href="/support" />
           </div>
 
           <Button
