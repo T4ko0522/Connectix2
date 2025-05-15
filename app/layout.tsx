@@ -7,6 +7,7 @@ import { ToastContainer } from "react-toastify"
 import "react-toastify/dist/ReactToastify.css"
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://connectix2.example.com"), // まだ実際のURLは決まっていないので仮のURLを使用
   title: "Connectix 2 - あなたの全てのリンクを一つの場所に",
   description: "モダンで機能豊富なリンク共有と安全なプロフィール管理のためのプラットフォーム",
   icons: {
@@ -40,7 +41,11 @@ export const metadata: Metadata = {
     description: "リンク共有とプロフィール管理を一つに。",
     images: ["/og-image.png"]
   },
-  themeColor: "#ffffff"
+}
+
+export const viewport = {
+  themeColor: "#ffffff",
+  width: "device-width",
 }
 
 export default function RootLayout({
