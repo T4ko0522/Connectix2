@@ -3,13 +3,14 @@
 import { useRef } from "react"
 
 import { useEffect, useState } from "react"
-import { useParams } from "next/navigation"
+import { useParams, notFound } from "next/navigation"
 import { Button } from "@/components/ui/button"
 import { Logo } from "@/components/logo"
 import { MapPin, Briefcase, ExternalLink, Share2, ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import { SocialLinkIcon, getPlatformById } from "@/components/social-link-templates"
 import { toast } from "react-toastify"
+import UsernameSetupLoading from "../signup/username/loading"
 
 // プロフィールデータの型定義
 type ProfileData = {
@@ -48,8 +49,8 @@ type ProfileData = {
     displayName: string
     userId: string
     profilePicture: string | null
-    status: "online" | "offline" | "ask me" | "join me" | "busy" | "away"
-    trustRank: "visitor" | "new user" | "user" | "known user" | "trusted user" | "veteran"
+    status: "online" | "offline" | "ask me" | "join me" | "do not disturb" | "active"
+    trustRank: "visitor" | "new user" | "user" | "known user" | "trusted user" | "vrchat team"
   }
 }
 
@@ -58,7 +59,6 @@ export default function ProfilePage() {
   const username = params.username as string
   const [profileData, setProfileData] = useState<ProfileData | null>(null)
   const [loading, setLoading] = useState(true)
-  const [noiseOpacity, setNoiseOpacity] = useState(0)
 
   useEffect(() => {
     // ローカルストレージからプロフィールデータを取得
@@ -68,6 +68,16 @@ export default function ProfilePage() {
       // 実際のアプリケーションではAPIからデータを取得するが、
       // デモ用にローカルストレージから取得
       try {
+        // ユーザー名を取得
+        const displayName = localStorage.getItem("display_name") || UsernameSetupLoading
+        const profileImage = localStorage.getItem("profile_image")
+
+        if (!displayName) {
+          // ユーザー名が取得できない場合は404ページを表示
+          notFound()
+          return
+        }
+        
         // リンクデータを取得
         const linksData = localStorage.getItem("user_links")
         const links = linksData ? JSON.parse(linksData) : []
@@ -112,8 +122,8 @@ export default function ProfilePage() {
               (localStorage.getItem("vrchat_status") as
                 | "online"
                 | "offline"
-                | "busy"
-                | "away"
+                | "do not disturb"
+                | "active"
                 | "join me"
                 | "ask me") || "offline",
             trustRank:
@@ -123,7 +133,7 @@ export default function ProfilePage() {
                 | "user"
                 | "known user"
                 | "trusted user"
-                | "veteran") || "user",
+                | "vrchat team") || "user",
           }
         }
 
@@ -249,10 +259,10 @@ export default function ProfilePage() {
         return { color: "#3ba55c", text: "Join Me" }
       case "ask me":
         return { color: "#faa61a", text: "Ask Me" }
-      case "busy":
+      case "do not disturb":
         return { color: "#ed4245", text: "取り込み中" }
-      case "away":
-        return { color: "#faa61a", text: "離席中" }
+      case "active":
+        return { color: "#faa61a", text: "webサイトでオンライン" }
       default:
         return { color: "#747f8d", text: "オフライン" }
     }
