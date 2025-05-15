@@ -23,6 +23,5 @@
 ## 貢献
 主な貢献者  
 [@T4ko0522](https://github.com/T4ko0522)  
-[@Kohaku912](https://github.com/Kohaku912)  
   
 バグの修正、機能追加、改善提案のためのissueやpull requestなど、どんな改善も大歓迎です！！
