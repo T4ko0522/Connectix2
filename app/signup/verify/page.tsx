@@ -71,35 +71,32 @@ export default function VerifyPage() {
     }, 1000)
   }
 
-  const handleInputChange = (index: number, value: string) => {
-    if (value.length > 1) {
-      // 複数の文字が入力された場合（コピペなど）
-      const chars = value.split("")
-      const newCode = [...code]
+const handleInputChange = (index: number, value: string) => {
+  const newCode = [...code]
 
-      for (let i = 0; i < Math.min(chars.length, 6 - index); i++) {
-        if (/^[0-9]$/.test(chars[i])) {
-          newCode[index + i] = chars[i]
-        }
+  if (value.length > 1) {
+    // 複数の文字が貼り付けられた場合
+    const chars = value.split("")
+    for (let i = 0; i < Math.min(chars.length, 6 - index); i++) {
+      if (/^[0-9]$/.test(chars[i])) {
+        newCode[index + i] = chars[i]
       }
-
-      setCode(newCode)
-
-      // 最後の入力フィールドにフォーカス
-      const lastIndex = Math.min(index + chars.length, 5)
-      if (inputRefs.current[lastIndex]) {
-        inputRefs.current[lastIndex].focus()
-      }
-    } else if (/^[0-9]$/.test(value) || value === "") {
-      // 単一の数字または削除の場合
-      const newCode = [...code]
-      newCode[index] = value
-      setCode(newCode)
-
-      // 次の入力フィールドにフォーカス（削除の場合は移動しない）
-      inputRefs.current[0]?.focus()
     }
+    setCode(newCode)
+
+    const lastIndex = Math.min(index + chars.length, 5)
+    inputRefs.current[lastIndex]?.focus()
+  } else if (/^[0-9]$/.test(value)) {
+    // 単一数字入力時 → 次へ移動
+    newCode[index] = value
+    setCode(newCode)
+    if (index < 5) inputRefs.current[index + 1]?.focus()
+  } else if (value === "") {
+    // 削除時 → そのまま
+    newCode[index] = ""
+    setCode(newCode)
   }
+}
 
   const handleKeyDown = (index: number, e: React.KeyboardEvent<HTMLInputElement>) => {
     // バックスペースキーが押された場合、前の入力フィールドにフォーカス
@@ -295,17 +292,6 @@ export default function VerifyPage() {
                   "コードを再送信"
                 )}
               </Button>
-            </div>
-
-            {/* デバッグ用のダイレクトリンク（本番環境では削除） */}
-            <div className="text-center text-xs text-gray-500 mt-4">
-              <p>
-                問題が発生した場合は、
-                <Link href="/dashboard" className="text-yellow-400 hover:underline">
-                  こちら
-                </Link>
-                からダッシュボードに直接アクセスしてください。
-              </p>
             </div>
           </div>
         </div>
